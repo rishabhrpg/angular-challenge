@@ -8,7 +8,7 @@ import { Character } from "../app.component";
 @Component({
   selector: "app-dialog",
   templateUrl: "./dialog.component.html",
-  styleUrls: ["./dialog.component.css"]
+  styleUrls: ["./dialog.component.scss"]
 })
 export class DialogComponent implements OnInit {
   constructor(
@@ -17,17 +17,17 @@ export class DialogComponent implements OnInit {
     private http: HttpClient
   ) {}
 
-  panelOpenState: boolean;
+  panelOpenState!: boolean;
   characterInfo: any;
   episodeList: any;
-  characterList: any[];
+  characterList!: any[] | null;
 
-  get character() {
-    return this.data["c"];
+  get character() : Character {
+    return (this.data as any).c;
   }
 
   requestCharacterAndEpisodes(): Observable<any[]> {
-    const episodesUrlArray = [];
+    const episodesUrlArray: any[] = [];
 
     this.character.episode.forEach(epUrl => {
       episodesUrlArray.push(epUrl.slice(-2).replace("/", ""));
@@ -43,8 +43,8 @@ export class DialogComponent implements OnInit {
     return forkJoin([getCharacterInfo, getEpisodeList]);
   }
 
-  getCharacterInEpisodes(charactersList) {
-    const charactersUrlArray = [];
+  getCharacterInEpisodes(charactersList: string[]) {
+    const charactersUrlArray: any[] = [];
     charactersList.forEach(characterUrl => {
       charactersUrlArray.push(characterUrl.slice(-2).replace("/", ""));
     });

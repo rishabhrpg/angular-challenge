@@ -54,19 +54,19 @@ export interface HttpRequest {
   styleUrls: ["./app.component.scss"]
 })
 export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
-  @ViewChild(MatPaginator) paginator: MatPaginator;
-  characters$: Observable<any>;
-  characterDataSource: MatTableDataSource<Character[]>;
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  characters$!: Observable<any>;
+  characterDataSource!: MatTableDataSource<Character[]>;
   characterDatabase = new HttpDatabase(this.httpClient);
   searchTerm$ = new BehaviorSubject<string>("");
   resultsEmpty$ = new BehaviorSubject<boolean>(false);
   status = "";
   resultsLength = 0;
 
-  filterFormGroup: FormGroup;
+  filterFormGroup!: FormGroup;
   searchField = new FormControl("");
 
-  dialogRef: MatDialogRef<DialogComponent>;
+  dialogRef!: MatDialogRef<DialogComponent>;
 
   constructor(
     private httpClient: HttpClient,
@@ -81,7 +81,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
         .getCharacters("", "", this.paginator.pageIndex)
         .subscribe((response: HttpRequest) => {
           this.characterDataSource = new MatTableDataSource(response.results as any[]);
-          this.resultsLength = response.info?.count;
+          this.resultsLength = response.info?.count as number;
           // this.characterDataSource.paginator = this.paginator;
           this.characters$ = this.characterDataSource.connect();
         });
@@ -102,7 +102,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   loadData() {
     this.characterDatabase
       .search(this.searchTerm$)
-      .subscribe((response: HttpRequest) => {
+      .subscribe((response) => {
         if (!response.info || !response.results) {
           this.resultsEmpty$.next(true)
           return
@@ -115,7 +115,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
       });
   }
 
-  openDialog(char) {
+  openDialog(char: string) {
     this.dialogRef = this.dialog.open(DialogComponent, {
       data: {
         c: char
@@ -147,6 +147,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     if (status === "Dead") {
       return "red";
     }
+    return "";
   }
 }
 
