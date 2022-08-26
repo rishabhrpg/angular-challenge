@@ -7,7 +7,7 @@ import { HttpClient, HttpParams } from "@angular/common/http";
 import { FormBuilder, FormControl, FormGroup } from "@angular/forms";
 import { MatPaginator } from "@angular/material/paginator";
 import { MatTableDataSource } from "@angular/material/table";
-import { catchError, debounceTime, distinctUntilChanged, switchMap } from "rxjs/operators";
+import { catchError, debounceTime, distinctUntilChanged, switchMap, tap } from "rxjs/operators";
 
 export interface Origin {
   [key: string]: any;
@@ -77,6 +77,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
           this.characters$ = this.characterDataSource.connect();
         });
     });
+
   }
 
   ngOnInit() {
@@ -91,9 +92,11 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   loadData() {
+    console.log('loading data');
     this.characterDatabase
       .search(this.searchTerm$)
       .subscribe((response) => {
+        console.log('load data response ', this.searchTerm$.getValue(), response);
         if (!response.info || !response.results) {
           this.resultsEmpty$.next(true)
           return
@@ -103,6 +106,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
         this.characterDataSource = new MatTableDataSource(response.results as any[]);
         this.characterDataSource.paginator = this.paginator;
         this.characters$ = this.characterDataSource.connect();
+        this.applyFilter();
       });
   }
 
@@ -138,7 +142,7 @@ export class HttpDatabase {
             return of({ info: null, results: null });
           })
         )
-      )
+      ),
     );
   }
 
