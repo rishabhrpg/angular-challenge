@@ -8,11 +8,13 @@ import { MaterialModule } from './material/material.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { DialogComponent } from './dialog/dialog.component';
+import { CharacterCardComponent } from './character-card/character-card.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    DialogComponent
+    DialogComponent,
+    CharacterCardComponent
   ],
   imports: [
     BrowserModule,

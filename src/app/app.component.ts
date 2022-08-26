@@ -1,19 +1,13 @@
 import {
-  Component,
-  OnInit,
-  OnDestroy,
-  ViewChild,
-  AfterViewInit
+  AfterViewInit, Component, OnDestroy, OnInit, ViewChild
 } from "@angular/core";
-import { BehaviorSubject, Observable, of} from "rxjs";
+import { BehaviorSubject, Observable, of } from "rxjs";
 
 import { HttpClient, HttpParams } from "@angular/common/http";
-import { catchError, debounceTime, distinctUntilChanged, switchMap } from "rxjs/operators";
-import { DialogComponent } from "./dialog/dialog.component";
 import { FormBuilder, FormControl, FormGroup } from "@angular/forms";
 import { MatPaginator } from "@angular/material/paginator";
 import { MatTableDataSource } from "@angular/material/table";
-import { MatDialog, MatDialogRef } from "@angular/material/dialog";
+import { catchError, debounceTime, distinctUntilChanged, switchMap } from "rxjs/operators";
 
 export interface Origin {
   [key: string]: any;
@@ -66,11 +60,8 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   filterFormGroup!: FormGroup;
   searchField = new FormControl("");
 
-  dialogRef!: MatDialogRef<DialogComponent>;
-
   constructor(
     private httpClient: HttpClient,
-    public dialog: MatDialog,
     private fb: FormBuilder
   ) {
 
@@ -115,21 +106,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
       });
   }
 
-  openDialog(char: string) {
-    this.dialogRef = this.dialog.open(DialogComponent, {
-      data: {
-        c: char
-      }
-    });
 
-    this.dialogRef.afterClosed().subscribe((res: string) => {
-      if (!res) {
-        return;
-      }
-      this.searchField.patchValue(res);
-      this.searchTerm$.next(res);
-    });
-  }
 
   applyFilter() {
     const filterValue = this.status;
@@ -140,19 +117,16 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  setStatusColor(status: string) {
-    if (status === "Alive") {
-      return "green";
-    }
-    if (status === "Dead") {
-      return "red";
-    }
-    return "";
+  updateResponse(response: string) {
+    this.searchField.patchValue(response);
+    this.searchTerm$.next(response);
   }
+
+
 }
 
 export class HttpDatabase {
-  constructor(private _httpClient: HttpClient) {}
+  constructor(private _httpClient: HttpClient) { }
 
   search(terms: Observable<string>) {
     return terms.pipe(
@@ -178,7 +152,7 @@ export class HttpDatabase {
       params: new HttpParams()
         .set('name', name)
         .set('status', status)
-        .set('page', (page +1 ).toString())
+        .set('page', (page + 1).toString())
     });
   }
 }
