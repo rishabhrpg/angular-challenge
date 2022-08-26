@@ -20,14 +20,32 @@
   <div class="flex-container">
     <mat-form-field>
       <mat-label>Filter</mat-label>
-      <mat-select (selectionChange)="applyFilter()" [(ngModel)]="status">
+      <mat-select (selectionChange)="applyFilterFromDatabase($event)" [(ngModel)]="status">
         <mat-option [value]="''">Todos</mat-option>
         <mat-option *ngFor="let status of ['dead', 'alive', 'unknow']" [value]="status">
           {{status}}</mat-option>
       </mat-select>
     </mat-form-field>
   </div>
-
+  <div class="flex-container">
+    <mat-form-field>
+      <mat-label>Order By</mat-label>
+      <mat-select (selectionChange)="reOrder($event)" [(ngModel)]="orderBy">
+        <mat-option [value]="''">Default</mat-option>
+        <mat-option *ngFor="let orderBy of ['episode', 'name']" [value]="orderBy">
+          {{orderBy}}</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+  <!-- <div class="flex-container">
+    <mat-form-field>
+      <mat-label>Order Direction</mat-label>
+      <mat-radio-group aria-label="Select an option" (change)=""  [(ngModel)]="orderDir">
+        <mat-radio-button value="1">Option 1</mat-radio-button>
+        <mat-radio-button value="2">Option 2</mat-radio-button>
+      </mat-radio-group>
+    </mat-form-field>
+  </div> -->
   <div class="flex-container">
    <app-character-card (response)="updateResponse($event)" [char]="char" *ngFor="let char of characters$ | async"></app-character-card>
   </div>

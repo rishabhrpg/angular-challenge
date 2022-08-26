@@ -8,6 +8,7 @@ import { FormBuilder, FormControl, FormGroup } from "@angular/forms";
 import { MatPaginator } from "@angular/material/paginator";
 import { MatTableDataSource } from "@angular/material/table";
 import { catchError, debounceTime, distinctUntilChanged, switchMap, tap } from "rxjs/operators";
+import { MatSort, Sort } from "@angular/material/sort";
 
 export interface Origin {
   [key: string]: any;
@@ -50,12 +51,15 @@ export interface HttpRequest {
 export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   characters$!: Observable<any>;
-  characterDataSource!: MatTableDataSource<Character[]>;
+  characterDataSource!: MatTableDataSource<Character>;
   characterDatabase = new HttpDatabase(this.httpClient);
   searchTerm$ = new BehaviorSubject<string>("");
   resultsEmpty$ = new BehaviorSubject<boolean>(false);
   status = "";
   resultsLength = 0;
+  orderBy: '' | 'episode' | 'name' = '';
+  orderDir: 'asc' | 'desc' = 'asc';
+  sortedData: any[] = [];
 
   filterFormGroup!: FormGroup;
   searchField = new FormControl("");
@@ -69,7 +73,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
     this.paginator.page.subscribe(() => {
       this.characterDatabase
-        .getCharacters("", "", this.paginator.pageIndex)
+        .getCharacters(this.searchTerm$.value, this.status, this.paginator.pageIndex)
         .subscribe((response: HttpRequest) => {
           this.characterDataSource = new MatTableDataSource(response.results as any[]);
           this.resultsLength = response.info?.count as number;
@@ -97,19 +101,24 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
       .search(this.searchTerm$)
       .subscribe((response) => {
         console.log('load data response ', this.searchTerm$.getValue(), response);
-        if (!response.info || !response.results) {
-          this.resultsEmpty$.next(true)
-          return
-        }
-        this.resultsEmpty$.next(false)
-        this.resultsLength = response.info?.count;
-        this.characterDataSource = new MatTableDataSource(response.results as any[]);
-        this.characterDataSource.paginator = this.paginator;
-        this.characters$ = this.characterDataSource.connect();
+        this.updateCharacters(response);
         this.applyFilter();
       });
   }
 
+  updateCharacters(response: any) {
+    if (!response.info || !response.results) {
+      this.resultsEmpty$.next(true)
+      return
+    }
+    this.resultsEmpty$.next(false)
+    this.resultsLength = response.info?.count;
+    this.characterDataSource = new MatTableDataSource(response.results as any[]);
+    console.log(this.characterDataSource);
+
+    this.characterDataSource.paginator = this.paginator;
+    this.characters$ = this.characterDataSource.connect();
+  }
 
 
   applyFilter() {
@@ -121,12 +130,34 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  applyFilterFromDatabase(event: any) {
+    this.characterDatabase.getCharacters(this.searchTerm$.value, event.value).subscribe(data => {
+      this.updateCharacters(data);
+    })
+  }
+
+  reOrder(event: any) {
+
+    let orderedData = this.characterDataSource.data;
+    switch (this.orderBy) {
+      case 'name':
+        orderedData = orderedData.sort((a, b) => compare(a.name, b.name, this.orderDir === 'asc'))
+    }
+
+    this.characterDataSource = new MatTableDataSource(orderedData);
+
+    this.characterDataSource.paginator = this.paginator;
+    this.characters$ = this.characterDataSource.connect();
+  }
+
   updateResponse(response: string) {
     this.searchField.patchValue(response);
     this.searchTerm$.next(response);
   }
 
-
+  sortData() {
+    console.log(this.characterDataSource);
+  }
 }
 
 export class HttpDatabase {
@@ -159,4 +190,8 @@ export class HttpDatabase {
         .set('page', (page + 1).toString())
     });
   }
+}
+
+function compare(a: number | string, b: number | string, isAsc: boolean) {
+  return (a < b ? -1 : 1) * (isAsc ? 1 : -1);
 }
