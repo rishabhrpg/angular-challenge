@@ -142,6 +142,15 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     switch (this.orderBy) {
       case 'name':
         orderedData = orderedData.sort((a, b) => compare(a.name, b.name, this.orderDir === 'asc'))
+        break;
+      case 'episode':
+        orderedData = orderedData.sort((a, b) => {
+          a.episode.sort();
+          const latestEpisodeForA = a.episode[a.episode.length - 1];
+          const latestEpisodeForB = b.episode[b.episode.length - 1];
+          return compare(latestEpisodeForA, latestEpisodeForB, this.orderDir === 'desc');
+        })
+        break;
     }
 
     this.characterDataSource = new MatTableDataSource(orderedData);
